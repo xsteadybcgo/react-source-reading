@@ -285,6 +285,7 @@ export function cloneAndReplaceKey(oldElement, newKey) {
  * Clone and return a new ReactElement using element as the starting point.
  * See https://reactjs.org/docs/react-api.html#cloneelement
  */
+// ReactElement 一个新建过程，和createElement类似
 export function cloneElement(element, config, children) {
   invariant(
     !(element === null || element === undefined),

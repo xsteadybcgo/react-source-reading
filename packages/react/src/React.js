@@ -14,17 +14,17 @@ import {
   REACT_SUSPENSE_TYPE,
 } from 'shared/ReactSymbols';
 
-import {Component, PureComponent} from './ReactBaseClasses';
-import {createRef} from './ReactCreateRef';
-import {forEach, map, count, toArray, only} from './ReactChildren';
+import { Component, PureComponent } from './ReactBaseClasses';
+import { createRef } from './ReactCreateRef';
+import { forEach, map, count, toArray, only } from './ReactChildren';
 import {
   createElement,
   createFactory,
   cloneElement,
   isValidElement,
 } from './ReactElement';
-import {createContext} from './ReactContext';
-import {lazy} from './ReactLazy';
+import { createContext } from './ReactContext';
+import { lazy } from './ReactLazy';
 import forwardRef from './forwardRef';
 import memo from './memo';
 import {
@@ -33,7 +33,7 @@ import {
   cloneElementWithValidation,
 } from './ReactElementValidator';
 import ReactSharedInternals from './ReactSharedInternals';
-import {enableStableConcurrentModeAPIs} from 'shared/ReactFeatureFlags';
+import { enableStableConcurrentModeAPIs } from 'shared/ReactFeatureFlags';
 
 const React = {
   Children: {
@@ -54,6 +54,7 @@ const React = {
   memo,
 
   Fragment: REACT_FRAGMENT_TYPE,
+  // 对子组件做一些提醒
   StrictMode: REACT_STRICT_MODE_TYPE,
   Suspense: REACT_SUSPENSE_TYPE,
 
@@ -67,6 +68,7 @@ const React = {
   __SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED: ReactSharedInternals,
 };
 
+// ConcurrentMode 只是设置了这个标志位，以备后续渲染优先级
 if (enableStableConcurrentModeAPIs) {
   React.ConcurrentMode = REACT_CONCURRENT_MODE_TYPE;
   React.Profiler = REACT_PROFILER_TYPE;

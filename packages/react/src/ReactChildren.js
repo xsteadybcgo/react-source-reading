@@ -13,7 +13,7 @@ import {
   REACT_PORTAL_TYPE,
 } from 'shared/ReactSymbols';
 
-import {isValidElement, cloneAndReplaceKey} from './ReactElement';
+import { isValidElement, cloneAndReplaceKey } from './ReactElement';
 import ReactDebugCurrentFrame from './ReactDebugCurrentFrame';
 
 const SEPARATOR = '.';
@@ -31,7 +31,7 @@ function escape(key) {
     '=': '=0',
     ':': '=2',
   };
-  const escapedString = ('' + key).replace(escapeRegex, function(match) {
+  const escapedString = ('' + key).replace(escapeRegex, function (match) {
     return escaperLookup[match];
   });
 
@@ -96,6 +96,8 @@ function releaseTraverseContext(traverseContext) {
  * process.
  * @return {!number} The number of children in this subtree.
  */
+
+// 返回值： The number of children in this subtree.
 function traverseAllChildrenImpl(
   children,
   nameSoFar,
@@ -136,6 +138,9 @@ function traverseAllChildrenImpl(
       // so that it's consistent if the number of children grows.
       nameSoFar === '' ? SEPARATOR + getComponentKey(children, 0) : nameSoFar,
     );
+    // 最后返回子组件个数 
+    // 如果是数组或者迭代器，通过递归叠加该值
+    // 中间对所有的child执行callback
     return 1;
   }
 
@@ -149,6 +154,7 @@ function traverseAllChildrenImpl(
     for (let i = 0; i < children.length; i++) {
       child = children[i];
       nextName = nextNamePrefix + getComponentKey(child, i);
+      // 递归调用
       subtreeCount += traverseAllChildrenImpl(
         child,
         nextName,
@@ -165,8 +171,8 @@ function traverseAllChildrenImpl(
           warning(
             didWarnAboutMaps,
             'Using Maps as children is unsupported and will likely yield ' +
-              'unexpected results. Convert it to a sequence/iterable of keyed ' +
-              'ReactElements instead.',
+            'unexpected results. Convert it to a sequence/iterable of keyed ' +
+            'ReactElements instead.',
           );
           didWarnAboutMaps = true;
         }
@@ -255,7 +261,7 @@ function getComponentKey(component, index) {
 }
 
 function forEachSingleChild(bookKeeping, child, name) {
-  const {func, context} = bookKeeping;
+  const { func, context } = bookKeeping;
   func.call(context, child, bookKeeping.count++);
 }
 
@@ -285,34 +291,53 @@ function forEachChildren(children, forEachFunc, forEachContext) {
   releaseTraverseContext(traverseContext);
 }
 
+// map中递归对每一个子节点调用改函数
+// traverseContext,
+// children
+// nameSoFar
 function mapSingleChildIntoContext(bookKeeping, child, childKey) {
-  const {result, keyPrefix, func, context} = bookKeeping;
+  const { result, keyPrefix, func, context } = bookKeeping;
 
   let mappedChild = func.call(context, child, bookKeeping.count++);
   if (Array.isArray(mappedChild)) {
+    // 回调调用后，返回结果是数组
+    // 进入大外层递归调用，相当于mappedChild再次进入到children.map的调用
     mapIntoWithKeyPrefixInternal(mappedChild, result, childKey, c => c);
   } else if (mappedChild != null) {
+    // type 为 REACT_ELEMENT_TYPE 的 object是有效的element
     if (isValidElement(mappedChild)) {
+      // cloneAndReplaceKey 换个新key 返回
       mappedChild = cloneAndReplaceKey(
         mappedChild,
         // Keep both the (mapped) and old keys if they differ, just as
         // traverseAllChildren used to do for objects as children
         keyPrefix +
-          (mappedChild.key && (!child || child.key !== mappedChild.key)
-            ? escapeUserProvidedKey(mappedChild.key) + '/'
-            : '') +
-          childKey,
+        (mappedChild.key && (!child || child.key !== mappedChild.key)
+          ? escapeUserProvidedKey(mappedChild.key) + '/'
+          : '') +
+        childKey,
       );
     }
     result.push(mappedChild);
   }
 }
 
+// 对map内调用分析，参数依次为 children [] null callback context
 function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
   let escapedPrefix = '';
+  // map 不走
   if (prefix != null) {
     escapedPrefix = escapeUserProvidedKey(prefix) + '/';
   }
+  // 创建对象池，性能优化，池中没有对象，就直接返回
+  // {
+  //   result: children,
+  //   keyPrefix: '',
+  //   func: callback,
+  //   context: context,
+  //   count: 0,
+  // };
+  // 有对象就pop一个出来
   const traverseContext = getPooledTraverseContext(
     array,
     escapedPrefix,
@@ -336,10 +361,13 @@ function mapIntoWithKeyPrefixInternal(children, array, prefix, func, context) {
  * @param {*} context Context for mapFunction.
  * @return {object} Object containing the ordered map of results.
  */
+// React.children.map api
+
 function mapChildren(children, func, context) {
   if (children == null) {
     return children;
   }
+  // 最后通过mapSingleChildIntoContext函数一个个push
   const result = [];
   mapIntoWithKeyPrefixInternal(children, result, null, func, context);
   return result;

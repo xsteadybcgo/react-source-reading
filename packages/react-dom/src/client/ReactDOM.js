@@ -514,6 +514,7 @@ function legacyRenderSubtreeIntoContainer(
   callback: ?Function,
 ) {
   // TODO: Ensure all entry points contain this check
+  // 判断插入的入口节点是否有效的的NodeType
   invariant(
     isValidContainer(container),
     'Target container is not a DOM element.',
@@ -528,6 +529,7 @@ function legacyRenderSubtreeIntoContainer(
   let root: Root = (container._reactRootContainer: any);
   if (!root) {
     // Initial mount
+    // 初始化走改分支，forceHydrate为false
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
@@ -624,6 +626,7 @@ const ReactDOM: Object = {
     return DOMRenderer.findHostInstance(componentOrElement);
   },
 
+  // spa入口
   hydrate(element: React$Node, container: DOMContainer, callback: ?Function) {
     // TODO: throw or warn if we couldn't hydrate?
     return legacyRenderSubtreeIntoContainer(

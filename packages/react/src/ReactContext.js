@@ -7,9 +7,9 @@
  * @flow
  */
 
-import {REACT_PROVIDER_TYPE, REACT_CONTEXT_TYPE} from 'shared/ReactSymbols';
+import { REACT_PROVIDER_TYPE, REACT_CONTEXT_TYPE } from 'shared/ReactSymbols';
 
-import type {ReactContext} from 'shared/ReactTypes';
+import type { ReactContext } from 'shared/ReactTypes';
 
 import warningWithoutStack from 'shared/warningWithoutStack';
 import warning from 'shared/warning';
@@ -24,9 +24,9 @@ export function createContext<T>(
     if (__DEV__) {
       warningWithoutStack(
         calculateChangedBits === null ||
-          typeof calculateChangedBits === 'function',
+        typeof calculateChangedBits === 'function',
         'createContext: Expected the optional second argument to be a ' +
-          'function. Instead received: %s',
+        'function. Instead received: %s',
         calculateChangedBits,
       );
     }
@@ -73,7 +73,7 @@ export function createContext<T>(
             warning(
               false,
               'Rendering <Context.Consumer.Provider> is not supported and will be removed in ' +
-                'a future major release. Did you mean to render <Context.Provider> instead?',
+              'a future major release. Did you mean to render <Context.Provider> instead?',
             );
           }
           return context.Provider;
@@ -105,7 +105,7 @@ export function createContext<T>(
             warning(
               false,
               'Rendering <Context.Consumer.Consumer> is not supported and will be removed in ' +
-                'a future major release. Did you mean to render <Context.Consumer> instead?',
+              'a future major release. Did you mean to render <Context.Consumer> instead?',
             );
           }
           return context.Consumer;
@@ -115,6 +115,7 @@ export function createContext<T>(
     // $FlowFixMe: Flow complains about missing properties because it doesn't understand defineProperty
     context.Consumer = Consumer;
   } else {
+    // Consumer 指向 context 本身
     context.Consumer = context;
   }
 

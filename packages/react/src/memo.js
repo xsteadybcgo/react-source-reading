@@ -10,6 +10,8 @@ import {REACT_MEMO_TYPE} from 'shared/ReactSymbols';
 import isValidElementType from 'shared/isValidElementType';
 import warningWithoutStack from 'shared/warningWithoutStack';
 
+// 返回一个对象 最终的作用全部要到调度过程中看了
+// $$typeof 和 type
 export default function memo<Props>(
   type: React$ElementType,
   compare?: (oldProps: Props, newProps: Props) => boolean,

@@ -22,9 +22,15 @@ function Component(props, context, updater) {
   this.props = props;
   this.context = context;
   // If a component has string refs, we will assign a different object later.
+  /**
+   *  string refs
+   *  this.refs.myRef.xxx = "xxx"
+   *  <p ref="myRef"></p> 
+   **/
   this.refs = emptyObject;
   // We initialize the default updater but the real one gets injected by the
   // renderer.
+  // TODO
   this.updater = updater || ReactNoopUpdateQueue;
 }
 
@@ -55,13 +61,14 @@ Component.prototype.isReactComponent = {};
  * @final
  * @protected
  */
-Component.prototype.setState = function(partialState, callback) {
+Component.prototype.setState = function (partialState, callback) {
+  // 对象或者方法
   invariant(
     typeof partialState === 'object' ||
-      typeof partialState === 'function' ||
-      partialState == null,
+    typeof partialState === 'function' ||
+    partialState == null,
     'setState(...): takes an object of state variables to update or a ' +
-      'function which returns an object of state variables.',
+    'function which returns an object of state variables.',
   );
   this.updater.enqueueSetState(this, partialState, callback, 'setState');
 };
@@ -80,7 +87,8 @@ Component.prototype.setState = function(partialState, callback) {
  * @final
  * @protected
  */
-Component.prototype.forceUpdate = function(callback) {
+Component.prototype.forceUpdate = function (callback) {
+  // TODO
   this.updater.enqueueForceUpdate(this, callback, 'forceUpdate');
 };
 
@@ -89,22 +97,23 @@ Component.prototype.forceUpdate = function(callback) {
  * we would like to deprecate them, we're not going to move them over to this
  * modern base class. Instead, we define a getter that warns if it's accessed.
  */
+// deprecated 即将废弃的api 🙈
 if (__DEV__) {
   const deprecatedAPIs = {
     isMounted: [
       'isMounted',
       'Instead, make sure to clean up subscriptions and pending requests in ' +
-        'componentWillUnmount to prevent memory leaks.',
+      'componentWillUnmount to prevent memory leaks.',
     ],
     replaceState: [
       'replaceState',
       'Refactor your code to use setState instead (see ' +
-        'https://github.com/facebook/react/issues/3236).',
+      'https://github.com/facebook/react/issues/3236).',
     ],
   };
-  const defineDeprecationWarning = function(methodName, info) {
+  const defineDeprecationWarning = function (methodName, info) {
     Object.defineProperty(Component.prototype, methodName, {
-      get: function() {
+      get: function () {
         lowPriorityWarning(
           false,
           '%s(...) is deprecated in plain JavaScript React classes. %s',
@@ -122,7 +131,7 @@ if (__DEV__) {
   }
 }
 
-function ComponentDummy() {}
+function ComponentDummy() { }
 ComponentDummy.prototype = Component.prototype;
 
 /**
@@ -135,11 +144,14 @@ function PureComponent(props, context, updater) {
   this.refs = emptyObject;
   this.updater = updater || ReactNoopUpdateQueue;
 }
-
+/**
+ * 继承过程
+ */
 const pureComponentPrototype = (PureComponent.prototype = new ComponentDummy());
 pureComponentPrototype.constructor = PureComponent;
 // Avoid an extra prototype jump for these methods.
 Object.assign(pureComponentPrototype, Component.prototype);
+// 定义PureComponent原型上的属性 /*TODO*/ isPureReactComponent
 pureComponentPrototype.isPureReactComponent = true;
 
-export {Component, PureComponent};
+export { Component, PureComponent };

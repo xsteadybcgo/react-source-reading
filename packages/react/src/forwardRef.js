@@ -5,7 +5,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import {REACT_FORWARD_REF_TYPE} from 'shared/ReactSymbols';
+import { REACT_FORWARD_REF_TYPE } from 'shared/ReactSymbols';
 
 import warningWithoutStack from 'shared/warningWithoutStack';
 
@@ -34,11 +34,12 @@ export default function forwardRef<Props, ElementType: React$ElementType>(
       warningWithoutStack(
         render.defaultProps == null && render.propTypes == null,
         'forwardRef render functions do not support propTypes or defaultProps. ' +
-          'Did you accidentally pass a React component?',
+        'Did you accidentally pass a React component?',
       );
     }
   }
-
+  // 返回的是一个对象，改对象的$$typeof是REACT_FORWARD_REF_TYPE
+  // 当作为jsx使用的时候, 最后返回的ReactElement的 $$typeof 依然是 REACT_ELEMENT_TYPE
   return {
     $$typeof: REACT_FORWARD_REF_TYPE,
     render,

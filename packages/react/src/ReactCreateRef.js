@@ -6,10 +6,12 @@
  * @flow
  */
 
-import type {RefObject} from 'shared/ReactTypes';
+import type { RefObject } from 'shared/ReactTypes';
 
 // an immutable object with a single mutable value
+// TODO
 export function createRef(): RefObject {
+  // 创建一个current属性的对象并返回
   const refObject = {
     current: null,
   };
