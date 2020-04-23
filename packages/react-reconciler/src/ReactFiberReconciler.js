@@ -131,7 +131,7 @@ function scheduleRootUpdate(
   }
 
   const update = createUpdate(expirationTime);
-  // return {
+  // updateType: {
   //   expirationTime: expirationTime,
 
   //   tag: UpdateState,
@@ -141,6 +141,7 @@ function scheduleRootUpdate(
   //   next: null,
   //   nextEffect: null,
   // };
+
   // Caution: React DevTools currently depends on this property
   // being called "element".
   update.payload = {element};
@@ -290,7 +291,7 @@ export function updateContainer(
 ): ExpirationTime {
   const current = container.current;
   const currentTime = requestCurrentTime();
-  // 优先级任务更新
+  // 优先级任务更新 这里赋值为 Sync
   const expirationTime = computeExpirationForFiber(currentTime, current);
   return updateContainerAtExpirationTime(
     element,

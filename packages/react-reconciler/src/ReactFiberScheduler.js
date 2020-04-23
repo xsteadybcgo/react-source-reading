@@ -1646,7 +1646,7 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   // Walk the parent path to the root and update the child expiration time.
   let node = fiber.return;
   let root = null;
-  // node===null 则说明node为rootFiber
+  // node===null 则说明node为rootFiber 初始化为此情况
   if (node === null && fiber.tag === HostRoot) {
     root = fiber.stateNode;
   } else {
@@ -1738,6 +1738,8 @@ function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
     interruptedBy = fiber;
     resetStack();
   }
+  // TODO 标记优先级 设置下面几个值
+  // nextExpirationTimeToWorkOn  earliestPendingTime/latestPendingTime expirationTime
   markPendingPriorityLevel(root, expirationTime);
   if (
     // If we're in the render phase, we don't need to schedule this root

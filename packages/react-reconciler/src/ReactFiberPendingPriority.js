@@ -29,6 +29,7 @@ export function markPendingPriorityLevel(
   const earliestPendingTime = root.earliestPendingTime;
   if (earliestPendingTime === NoWork) {
     // No other pending updates.
+    // 初始化状态
     root.earliestPendingTime = root.latestPendingTime = expirationTime;
   } else {
     if (earliestPendingTime > expirationTime) {

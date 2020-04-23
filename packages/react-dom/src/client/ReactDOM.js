@@ -319,6 +319,7 @@ ReactWork.prototype._onCommit = function (): void {
     return;
   }
   // TODO: Error handling.
+  // 遍历执行 work callback
   for (let i = 0; i < callbacks.length; i++) {
     const callback = callbacks[i];
     invariant(
@@ -347,12 +348,13 @@ ReactRoot.prototype.render = function (
   callback: ?() => mixed,
 ): Work {
   // ReactDOM.render最终执行栈
-  const root = this._internalRoot;
+  const root = this._internalRoot; // FiberRoot: BaseFiberRootProperties
   const work = new ReactWork();
   callback = callback === undefined ? null : callback;
   if (__DEV__) {
     warnOnInvalidCallback(callback, 'render');
   }
+  // 存在则push callback
   if (callback !== null) {
     work.then(callback);
   }
