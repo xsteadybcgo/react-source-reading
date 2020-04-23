@@ -624,7 +624,10 @@ if (typeof window !== 'undefined' && window._schedMock) {
       isAnimationFrameScheduled = false;
       return;
     }
-
+    // 若需要调小 activeFrameTime
+    // 当第二帧开始， rafTime要小于frameDeadline
+    // 因为上一帧的 frameDeadline 是rafTime + 33（一个完整帧的时间，假设我们当前为30fps）
+    // rafTime 每一帧间隔都是小于 33 的
     var nextFrameTime = rafTime - frameDeadline + activeFrameTime;
     if (
       nextFrameTime < activeFrameTime &&

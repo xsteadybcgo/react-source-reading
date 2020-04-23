@@ -131,6 +131,16 @@ function scheduleRootUpdate(
   }
 
   const update = createUpdate(expirationTime);
+  // return {
+  //   expirationTime: expirationTime,
+
+  //   tag: UpdateState,
+  //   payload: null,
+  //   callback: null,
+
+  //   next: null,
+  //   nextEffect: null,
+  // };
   // Caution: React DevTools currently depends on this property
   // being called "element".
   update.payload = {element};
@@ -153,13 +163,13 @@ function scheduleRootUpdate(
 
 export function updateContainerAtExpirationTime(
   element: ReactNodeList,
-  container: OpaqueRoot,
+  container: OpaqueRoot, // initial为FiberRoot
   parentComponent: ?React$Component<any, any>,
   expirationTime: ExpirationTime,
   callback: ?Function,
 ) {
   // TODO: If this is a nested container, this won't be the root.
-  const current = container.current;
+  const current = container.current; // 初始化fiber
 
   if (__DEV__) {
     if (ReactFiberInstrumentation.debugTool) {
@@ -173,7 +183,7 @@ export function updateContainerAtExpirationTime(
     }
   }
 
-  const context = getContextForSubtree(parentComponent);
+  const context = getContextForSubtree(parentComponent); //初始化为{}
   if (container.context === null) {
     container.context = context;
   } else {
@@ -280,6 +290,7 @@ export function updateContainer(
 ): ExpirationTime {
   const current = container.current;
   const currentTime = requestCurrentTime();
+  // 优先级任务更新
   const expirationTime = computeExpirationForFiber(currentTime, current);
   return updateContainerAtExpirationTime(
     element,
@@ -307,6 +318,7 @@ export {
 export function getPublicRootInstance(
   container: OpaqueRoot,
 ): React$Component<any, any> | PublicInstance | null {
+  // 初始化阶段container.current为 uninitializedFiber, child不存在
   const containerFiber = container.current;
   if (!containerFiber.child) {
     return null;

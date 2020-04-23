@@ -331,11 +331,14 @@ ReactWork.prototype._onCommit = function (): void {
   }
 };
 
+// ReactDOM.render中，三个参数 Container, false, true
 function ReactRoot(
   container: Container,
-  isConcurrent: boolean,
-  hydrate: boolean,
+  isConcurrent: boolean, // false
+  hydrate: boolean, // true
 ) {
+
+  // 创建 fiberRoot
   const root = DOMRenderer.createContainer(container, isConcurrent, hydrate);
   this._internalRoot = root;
 }
@@ -343,6 +346,7 @@ ReactRoot.prototype.render = function (
   children: ReactNodeList,
   callback: ?() => mixed,
 ): Work {
+  // ReactDOM.render最终执行栈
   const root = this._internalRoot;
   const work = new ReactWork();
   callback = callback === undefined ? null : callback;
@@ -352,7 +356,7 @@ ReactRoot.prototype.render = function (
   if (callback !== null) {
     work.then(callback);
   }
-  DOMRenderer.updateContainer(children, root, null, work._onCommit);
+  DOMRenderer.updateContainer(children, root/** fiberRoot */, null, work._onCommit);
   return work;
 };
 ReactRoot.prototype.unmount = function (callback: ?() => mixed): Work {
@@ -446,6 +450,7 @@ function getReactRootElementInContainer(container: any) {
 
 function shouldHydrateDueToLegacyHeuristic(container) {
   const rootElement = getReactRootElementInContainer(container);
+  // 有子节点 getReactRootElementInContainer返回true
   return !!(
     rootElement &&
     rootElement.nodeType === ELEMENT_NODE &&
@@ -507,10 +512,10 @@ function legacyCreateRootFromDOMContainer(
 }
 
 function legacyRenderSubtreeIntoContainer(
-  parentComponent: ?React$Component<any, any>,
+  parentComponent: ?React$Component<any, any>, //null
   children: ReactNodeList,
   container: DOMContainer,
-  forceHydrate: boolean,
+  forceHydrate: boolean, // false
   callback: ?Function,
 ) {
   // TODO: Ensure all entry points contain this check
@@ -529,7 +534,7 @@ function legacyRenderSubtreeIntoContainer(
   let root: Root = (container._reactRootContainer: any);
   if (!root) {
     // Initial mount
-    // 初始化走改分支，forceHydrate为false
+    // 初始化走分支，forceHydrate为false
     root = container._reactRootContainer = legacyCreateRootFromDOMContainer(
       container,
       forceHydrate,
@@ -550,6 +555,7 @@ function legacyRenderSubtreeIntoContainer(
           callback,
         );
       } else {
+        // 初始化执行该render
         root.render(children, callback);
       }
     });

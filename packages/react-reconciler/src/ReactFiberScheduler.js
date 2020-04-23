@@ -1616,6 +1616,8 @@ function retrySuspendedRoot(
   }
 }
 
+// 根据传入的fiber 向上寻找
+// 找到rootFiber 并且将寻找链路中的fiber expirationTime设置成相同的值
 function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   recordScheduleUpdate();
 
@@ -1644,6 +1646,7 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   // Walk the parent path to the root and update the child expiration time.
   let node = fiber.return;
   let root = null;
+  // node===null 则说明node为rootFiber
   if (node === null && fiber.tag === HostRoot) {
     root = fiber.stateNode;
   } else {
@@ -1720,7 +1723,7 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   return root;
 }
 
-function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
+function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) { 
   const root = scheduleWorkToRoot(fiber, expirationTime);
   if (root === null) {
     return;
@@ -1993,6 +1996,8 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
   }
 }
 
+// 可能同时存在多个root， 如多次调用ReactDOM.render
+// 保存一个队列
 function addRootToSchedule(root: FiberRoot, expirationTime: ExpirationTime) {
   // Add the root to the schedule.
   // Check if this root is already part of the schedule.
@@ -2401,6 +2406,7 @@ function unbatchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
       isUnbatchingUpdates = false;
     }
   }
+  // 初始化直接执行
   return fn(a);
 }
 
