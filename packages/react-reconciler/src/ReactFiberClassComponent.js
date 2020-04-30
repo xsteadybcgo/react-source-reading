@@ -186,7 +186,7 @@ export function applyDerivedStateFromProps(
 const classComponentUpdater = {
   isMounted,
   enqueueSetState(inst, payload, callback) {
-    const fiber = ReactInstanceMap.get(inst);
+    const fiber = ReactInstanceMap.get(inst); // inst._reactInternalFiber 
     const currentTime = requestCurrentTime();
     const expirationTime = computeExpirationForFiber(currentTime, fiber);
 
@@ -200,6 +200,7 @@ const classComponentUpdater = {
     }
 
     enqueueUpdate(fiber, update);
+    // 最终都是到scheduleWork执行
     scheduleWork(fiber, expirationTime);
   },
   enqueueReplaceState(inst, payload, callback) {
@@ -227,6 +228,7 @@ const classComponentUpdater = {
     const expirationTime = computeExpirationForFiber(currentTime, fiber);
 
     const update = createUpdate(expirationTime);
+    // 与setState不同 设置了tag
     update.tag = ForceUpdate;
 
     if (callback !== undefined && callback !== null) {

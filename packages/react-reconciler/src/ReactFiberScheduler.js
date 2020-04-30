@@ -356,6 +356,7 @@ function resetStack() {
   if (nextUnitOfWork !== null) {
     let interruptedWork = nextUnitOfWork.return;
     while (interruptedWork !== null) {
+      // unwindInterruptedWork 打断work上层节点state的一个回归
       unwindInterruptedWork(interruptedWork);
       interruptedWork = interruptedWork.return;
     }
@@ -1629,7 +1630,9 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   }
 
   // Update the source fiber's expiration time
+  // source fiber 当前更新节点
   if (
+    // fiber优先级更低，更新expirationTime
     fiber.expirationTime === NoWork ||
     fiber.expirationTime > expirationTime
   ) {
@@ -1637,6 +1640,7 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   }
   let alternate = fiber.alternate;
   if (
+    // 更新alternate的expirationTime
     alternate !== null &&
     (alternate.expirationTime === NoWork ||
       alternate.expirationTime > expirationTime)
@@ -1646,11 +1650,14 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
   // Walk the parent path to the root and update the child expiration time.
   let node = fiber.return;
   let root = null;
-  // node===null 则说明node为rootFiber 初始化为此情况
+  // node===null 则说明fiber为rootFiber rootFiber的return是null
   if (node === null && fiber.tag === HostRoot) {
     root = fiber.stateNode;
   } else {
+    // while循环 层层迭代向上设置节点的expirationTime
     while (node !== null) {
+      // 对于rootFiber与alternate（workInProcessTree）子节点的childExpirationTime 如果优先级小于当前expirationTime
+      // 则替换为当前expirationTime
       alternate = node.alternate;
       if (
         node.childExpirationTime === NoWork ||
@@ -1675,10 +1682,12 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
         root = node.stateNode;
         break;
       }
+      // 逐层寻找 直到rootFiber
       node = node.return;
     }
   }
 
+  //  找不到root节点 错误
   if (root === null) {
     if (__DEV__ && fiber.tag === ClassComponent) {
       warnAboutUpdateOnUnmounted(fiber);
@@ -1724,16 +1733,20 @@ function scheduleWorkToRoot(fiber: Fiber, expirationTime): FiberRoot | null {
 }
 
 function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) { 
+  // 函数中介绍的，更新fiber链路上所有的expirationTime，层层迭代到rootFiber 
+  // 最后返回rootFiber，在更新过程中还要更新alternate的rootFiber
   const root = scheduleWorkToRoot(fiber, expirationTime);
   if (root === null) {
     return;
   }
 
   if (
+    // isWorking用来标志是否当前有更新正在进行，不区分阶段：render与committing阶段
     !isWorking &&
     nextRenderExpirationTime !== NoWork &&
     expirationTime < nextRenderExpirationTime
   ) {
+    // 高优先级任务中断现有任务执行
     // This is an interruption. (Used for performance tracking.)
     interruptedBy = fiber;
     resetStack();
@@ -1749,10 +1762,12 @@ function scheduleWork(fiber: Fiber, expirationTime: ExpirationTime) {
     // ...unless this is a different root than the one we're rendering.
     nextRoot !== root
   ) {
+    // 由于markPendingPriorityLevel的调用，需要重新设置
     const rootExpirationTime = root.expirationTime;
     requestWork(root, rootExpirationTime);
   }
   if (nestedUpdateCount > NESTED_UPDATE_LIMIT) {
+    // 例如 componentDidMount setState，触发NESTED_UPDATE_LIMIT，就会警告⚠️
     // Reset this back to zero so subsequent updates don't throw.
     nestedUpdateCount = 0;
     invariant(
@@ -1991,9 +2006,9 @@ function requestWork(root: FiberRoot, expirationTime: ExpirationTime) {
   }
 
   // TODO: Get rid of Sync and use current time?
-  if (expirationTime === Sync) {
+  if (expirationTime === Sync) { // 同步调度
     performSyncWork();
-  } else {
+  } else { // 异步调度
     scheduleCallbackWithExpirationTime(root, expirationTime);
   }
 }
@@ -2384,6 +2399,7 @@ function onUncaughtError(error: mixed) {
 
 // TODO: Batching should be implemented at the renderer level, not inside
 // the reconciler.
+// 批处理更新，这就是为什么setState那不到最新state的原因
 function batchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   const previousIsBatchingUpdates = isBatchingUpdates;
   isBatchingUpdates = true;
@@ -2392,6 +2408,7 @@ function batchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   } finally {
     isBatchingUpdates = previousIsBatchingUpdates;
     if (!isBatchingUpdates && !isRendering) {
+      // updateQueue 进入performSyncWork
       performSyncWork();
     }
   }
