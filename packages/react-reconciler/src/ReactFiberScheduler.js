@@ -2399,7 +2399,7 @@ function onUncaughtError(error: mixed) {
 
 // TODO: Batching should be implemented at the renderer level, not inside
 // the reconciler.
-// 批处理更新，这就是为什么setState那不到最新state的原因
+// 批处理更新，这就是为什么setState拿不到最新state的原因
 function batchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   const previousIsBatchingUpdates = isBatchingUpdates;
   isBatchingUpdates = true;
