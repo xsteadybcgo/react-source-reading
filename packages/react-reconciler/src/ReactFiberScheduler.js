@@ -2406,6 +2406,10 @@ function batchedUpdates<A, R>(fn: (a: A) => R, a: A): R {
   try {
     return fn(a);
   } finally {
+    // previousIsBatchingUpdates false 
+    // 这也是为什么setTimeout 能及时拿到状态的原因
+    // 因为setTimeout的回调执行时候 isBatchingUpdate已经为false
+    // 就会进入performSyncWork
     isBatchingUpdates = previousIsBatchingUpdates;
     if (!isBatchingUpdates && !isRendering) {
       // updateQueue 进入performSyncWork
