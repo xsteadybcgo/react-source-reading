@@ -347,6 +347,7 @@ function unstable_scheduleCallback(callback, deprecated_options) {
     do {
       if (node.expirationTime > expirationTime) {
         // The new callback expires before this one.
+        // 寻找到最大过期时间的node
         next = node;
         break;
       }
@@ -446,6 +447,8 @@ var requestAnimationFrameWithTimeout = function(callback) {
     localClearTimeout(rAFTimeoutID);
     callback(timestamp);
   });
+  // ANIMATION_FRAME_TIMEOUT内必须调用callback
+  // 防止localRequestAnimationFrame长时间未调用
   rAFTimeoutID = localSetTimeout(function() {
     // cancel the requestAnimationFrame
     localCancelAnimationFrame(rAFID);
@@ -625,8 +628,8 @@ if (typeof window !== 'undefined' && window._schedMock) {
       return;
     }
     // 若需要调小 activeFrameTime
-    // 当第二帧开始， rafTime要小于frameDeadline
-    // 因为上一帧的 frameDeadline 是rafTime + 33（一个完整帧的时间，假设我们当前为30fps）
+    // 当第二帧开始， 这一帧的rafTime要小于frameDeadline
+    // 因为上一帧的 frameDeadline 是上一帧的rafTime + 33（一个完整帧的时间，假设我们当前为30fps）
     // rafTime 每一帧间隔都是小于 33 的
     var nextFrameTime = rafTime - frameDeadline + activeFrameTime;
     if (
@@ -658,10 +661,13 @@ if (typeof window !== 'undefined' && window._schedMock) {
   };
 
   requestHostCallback = function(callback, absoluteTimeout) {
+    // flushwork
     scheduledHostCallback = callback;
     timeoutTime = absoluteTimeout;
+    // 超时了 马上调度
     if (isFlushingHostCallback || absoluteTimeout < 0) {
       // Don't wait for the next frame. Continue working ASAP, in a new event.
+      // ASAP as soon as possible
       window.postMessage(messageKey, '*');
     } else if (!isAnimationFrameScheduled) {
       // If rAF didn't already schedule one, we need to schedule a frame.

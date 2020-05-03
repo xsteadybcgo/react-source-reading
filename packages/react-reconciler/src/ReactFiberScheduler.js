@@ -1081,6 +1081,7 @@ function performUnitOfWork(workInProgress: Fiber): Fiber | null {
     }
 
     next = beginWork(current, workInProgress, nextRenderExpirationTime);
+    // props changed
     workInProgress.memoizedProps = workInProgress.pendingProps;
 
     if (workInProgress.mode & ProfileMode) {
@@ -2154,8 +2155,10 @@ function performWork(minExpirationTime: ExpirationTime, dl: Deadline | null) {
     while (
       nextFlushedRoot !== null &&
       nextFlushedExpirationTime !== NoWork &&
+      // performAsyncWork
       (minExpirationTime === NoWork ||
         minExpirationTime >= nextFlushedExpirationTime) &&
+        // 时间片还有 || 过期了 强制执行了
       (!deadlineDidExpire || currentRendererTime >= nextFlushedExpirationTime)
     ) {
       performWorkOnRoot(
@@ -2163,11 +2166,13 @@ function performWork(minExpirationTime: ExpirationTime, dl: Deadline | null) {
         nextFlushedExpirationTime,
         currentRendererTime >= nextFlushedExpirationTime,
       );
+      // 再来一次 找到最高优先级fiber并更新下一个expirationTime
       findHighestPriorityRoot();
       recomputeCurrentRendererTime();
       currentSchedulerTime = currentRendererTime;
     }
   } else {
+    // Sync
     while (
       nextFlushedRoot !== null &&
       nextFlushedExpirationTime !== NoWork &&
@@ -2175,6 +2180,7 @@ function performWork(minExpirationTime: ExpirationTime, dl: Deadline | null) {
         minExpirationTime >= nextFlushedExpirationTime)
     ) {
       performWorkOnRoot(nextFlushedRoot, nextFlushedExpirationTime, true);
+      // 又去找一下root
       findHighestPriorityRoot();
     }
   }
